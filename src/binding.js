@@ -21,11 +21,6 @@ window.stik || (window.stik = {});
   }
 
   Binding.prototype.$setOne = function(prop) {
-
-    console.log(prop);
-    console.log(this.$$elements[prop]);
-
-    // this.$$elements[prop].forEach(function(elem) {
     for(var i = 0; i < this.$$elements[prop].length; i++) {
       if(this.$$elements[prop][i].nodeName === "INPUT" || this.$$elements[prop][i].nodeName === "TEXTAREA") {
         this.$$elements[prop][i].value = this.$$bind[prop];
@@ -47,7 +42,6 @@ window.stik || (window.stik = {});
 
   Binding.prototype.$setup = function(){
     var elements = this.$$template.querySelectorAll("[" + bindingKey + "]");
-    // console.log(elements);
 
     for(var i = 0; i < elements.length; i++) {
       var attr = elements[i].getAttribute(bindingKey);
