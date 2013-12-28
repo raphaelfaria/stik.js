@@ -1,12 +1,12 @@
 (function(){
   function Manager(modules){
-    this.$$contexts = [];
-    this.$$behaviors = [];
+    this.$$contexts       = [];
+    this.$$behaviors      = [];
     this.$$executionUnits = {};
-    this.$$modules = modules;
+    this.$$modules        = modules || {};
   }
 
-  Manager.prototype.$register = function(controller, action, executionUnit){
+  Manager.prototype.$addController = function(controller, action, executionUnit){
     if (!controller)    { throw "controller can't be empty"; }
     if (!action)        { throw "action can't be empty"; }
     if (!executionUnit) { throw "execution unit is missing"; }
@@ -100,7 +100,7 @@
     var templates = this.$findBehaviorTemplates(behavior.$$name);
 
     for (var i = 0; i < templates.length; i++) {
-      behavior.$load(templates[i], {});
+      behavior.$load(templates[i], this.$$modules);
     }
   };
 

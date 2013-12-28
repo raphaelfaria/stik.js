@@ -5,7 +5,7 @@
 //            See https://github.com/lukelex/stik.js/blob/master/LICENSE
 // ==========================================================================
 
-// Version: 0.5.0 | From: 26-12-2013
+// Version: 0.5.1 | From: 27-12-2013
 
 window.stik = {};
 
@@ -55,6 +55,8 @@ window.stik = {};
 })();
 
 (function(){
+  var behaviorKey = "data-behaviors";
+
   function Behavior(name, executionUnit){
     if (!name)          { throw "name is missing"; }
     if (!executionUnit) { throw "executionUnit is missing"; }
@@ -79,7 +81,10 @@ window.stik = {};
   };
 
   Behavior.prototype.$markAsApplyed = function(template){
-    template.className += " " + this.$$name + "-applyed";
+    behaviors = template.getAttribute(behaviorKey);
+    behaviors = ((behaviors || "") + " " + this.$$name).trim();
+
+    template.setAttribute(behaviorKey, behaviors);
   };
 
   window.stik.Behavior = Behavior;
@@ -253,13 +258,13 @@ window.stik = {};
 
 (function(){
   function Manager(modules){
-    this.$$contexts = [];
-    this.$$behaviors = [];
+    this.$$contexts       = [];
+    this.$$behaviors      = [];
     this.$$executionUnits = {};
-    this.$$modules = modules;
+    this.$$modules        = modules || {};
   }
 
-  Manager.prototype.$register = function(controller, action, executionUnit){
+  Manager.prototype.$addController = function(controller, action, executionUnit){
     if (!controller)    { throw "controller can't be empty"; }
     if (!action)        { throw "action can't be empty"; }
     if (!executionUnit) { throw "execution unit is missing"; }
@@ -353,7 +358,7 @@ window.stik = {};
     var templates = this.$findBehaviorTemplates(behavior.$$name);
 
     for (var i = 0; i < templates.length; i++) {
-      behavior.$load(templates[i], {});
+      behavior.$load(templates[i], this.$$modules);
     }
   };
 
@@ -389,8 +394,12 @@ window.stik = {};
     $urlState: new window.stik.UrlState()
   });
 
+  window.stik.controller = function(controller, action, executionUnit){
+    window.stik.$$manager.$addController(controller, action, executionUnit);
+  };
+
   window.stik.register = function(controller, action, executionUnit){
-    window.stik.$$manager.$register(controller, action, executionUnit);
+    window.stik.controller(controller, action, executionUnit);
   };
 
   window.stik.behavior = function(name, executionUnit){
