@@ -4,42 +4,62 @@ window.stik || (window.stik = {});
 
   var bindingKey = "data-bind";
 
-  function Binding(value, elements){
-    this.value = value;
-    this.elements = elements;
+  function Binding(template){
+    this.$$template = template;
+    this.$$bind = {};
+    this.$$elements = {};
 
-    this.$setupWatchers()
+    this.$setup();
   }
 
-  Binding.prototype.$set = function(value){
-    for (this.elements) {
-      textContent = value
+  Binding.prototype.$setAll = function() {
+    for (var prop in this.$$bind) {
+      if (this.$$bind.hasOwnProperty(prop)) {
+        this.$setOne(prop);
+      }
     }
-  };
+  }
 
-  Binding.prototype.$setupWatchers = function(){
-    for (elements) {
-      if elm is input {
-        this.$setupValueWatcher(elm, updateValue);
+  Binding.prototype.$setOne = function(prop) {
+
+    console.log(prop);
+    console.log(this.$$elements[prop]);
+
+    // this.$$elements[prop].forEach(function(elem) {
+    for(var i = 0; i < this.$$elements[prop].length; i++) {
+      if(this.$$elements[prop][i].nodeName === "INPUT" || this.$$elements[prop][i].nodeName === "TEXTAREA") {
+        this.$$elements[prop][i].value = this.$$bind[prop];
       }
       else {
-        this.$setupSimpleWatcher(elm);
+        this.$$elements[prop][i].textContent = this.$$bind[prop];
+      }
+    }
+  }
+
+  Binding.prototype.$set = function(val) {
+    if(!val) {
+      this.$setAll();
+    }
+    else {
+      this.$setOne(val);
+    }
+  };
+
+  Binding.prototype.$setup = function(){
+    var elements = this.$$template.querySelectorAll("[" + bindingKey + "]");
+    // console.log(elements);
+
+    for(var i = 0; i < elements.length; i++) {
+      var attr = elements[i].getAttribute(bindingKey);
+      if(!this.$$bind[attr])
+        this.$$bind[attr] = "";
+    }
+    for (var prop in this.$$bind) {
+      if (this.$$bind.hasOwnProperty(prop)) {
+        this.$$elements[prop] = this.$$template.querySelectorAll("[" + bindingKey + "=" + prop + "]");
       }
     }
   };
-});
 
-bind[teste] = {value: x,
-               elements: [input1, input2]
-            }
-obj = $viewBag.$bind({
-  teste: "valor"
-})
-obj.set("teste", "valorNovo");
-obj.teste # valorNovo
-
-$bind
-
-getElements(data=bing= teste)
-
-new Binding(property, elms)
+  stik.Binding = Binding;
+})();
