@@ -8,6 +8,7 @@ describe("ViewBag", function(){
       viewBag = new stik.ViewBag(template);
 
       expect(viewBag.$$template).toEqual(template);
+      expect(viewBag.$$bindings).toEqual({});
     });
   });
 
@@ -103,6 +104,24 @@ describe("ViewBag", function(){
       expect(
         template.getElementsByTagName("strong")[0].textContent
       ).toEqual("");
+    });
+  });
+
+  describe("#$set", function(){
+    it("setting up a new binding", function(){
+      var viewBag, template;
+
+      template = new DOMParser().parseFromString(
+        '<div><span data-bind="userName"></span></div>',
+        "text/xml"
+      ).firstChild;
+
+      viewBag = new stik.ViewBag(template);
+
+      viewBag.$set("userName", "Anakin");
+
+      expect(viewBag.$$bindings["userName"]).toBeDefined();
+      expect(template.textContent).toEqual("Anakin");
     });
   });
 });

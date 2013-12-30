@@ -9,6 +9,7 @@ module.exports = function(grunt){
     'src/view_bag.js',
     'src/manager.js',
     'src/public.js',
+    'src/binding.js',
   ];
 
   grunt.initConfig({

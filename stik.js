@@ -5,7 +5,7 @@
 //            See https://github.com/lukelex/stik.js/blob/master/LICENSE
 // ==========================================================================
 
-// Version: 0.5.1 | From: 27-12-2013
+// Version: 0.5.1 | From: 30-12-2013
 
 window.stik = {};
 
@@ -227,7 +227,18 @@ window.stik = {};
 
   function ViewBag(template){
     this.$$template = template;
+    this.$$bindings = {};
   }
+
+  ViewBag.prototype.$fieldsToBind = function(){
+    if (this.$$template.getAttribute(bindingKey)) {
+      return [this.$$template];
+    }
+
+    return this.$$template.querySelectorAll(
+      "[" + bindingKey + "]"
+    );
+  };
 
   ViewBag.prototype.$render = function(dataSet){
     var fields, dataToBind;
@@ -243,19 +254,23 @@ window.stik = {};
     }
   };
 
-  ViewBag.prototype.$fieldsToBind = function(){
-    if (this.$$template.getAttribute(bindingKey)) {
-      return [this.$$template];
+  ViewBag.prototype.$set = function(property, value){
+    if(!this.$$bindings[property]) {
+      this.$$bindings[property] = new window.stik.Binding(
+        property, value, this.$findElements(property)
+      );
     }
+    else {
+      this.$$bindings[property].$updateValue(value);
+    }
+  };
 
-    return this.$$template.querySelectorAll(
-      "[" + bindingKey + "]"
-    );
+  ViewBag.prototype.$findElements = function(property){
+    return this.$$template.querySelectorAll("[" + bindingKey + "=" + property + "]");
   };
 
   window.stik.ViewBag = ViewBag;
 })();
-
 (function(){
   function Manager(modules){
     this.$$contexts       = [];
@@ -409,4 +424,36 @@ window.stik = {};
   window.stik.bindLazy = function(){
     this.$$manager.$buildContexts();
   };
+})();
+
+(function(){
+
+  var bindingKey = "data-bind";
+
+  function Binding(property, value, nodeElements){
+    this.$$property     = property;
+    this.$$value        = value;
+    this.$$nodeElements = nodeElements;
+
+    this.$setupWatchers();
+    this.$updateDOM();
+  }
+
+  Binding.prototype.$updateValue = function(value){
+    this.$$value = value;
+    this.$updateDOM();
+  };
+
+  Binding.prototype.$updateDOM = function(){
+    for(var i = 0; i < this.$$nodeElements.length; i++) {
+      if(this.$$nodeElements[i].nodeName === "INPUT" || this.$$nodeElements[i].nodeName === "TEXTAREA") {
+        this.$$nodeElements[i].value = this.$$value;
+      }
+      else {
+        this.$$nodeElements[i].textContent = this.$$value;
+      }
+    }
+  };
+
+  window.stik.Binding = Binding;
 })();
